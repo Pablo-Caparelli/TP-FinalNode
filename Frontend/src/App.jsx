@@ -48,7 +48,7 @@ function App() {
 
           // 🔥 Traer mensajes reales
           const resMensajes = await axios.get(
-            `http://localhost:1234/messages/${chat._id}`,
+            `http://localhost:1234/messages/chat/${chat._id}`,
           );
 
           if (resMensajes.data.success) {
@@ -155,6 +155,22 @@ function App() {
       setUsuarios((prev) => prev.filter((u) => u._id !== id));
     } catch (error) {
       console.error("Error al eliminar:", error);
+    }
+  };
+
+  const eliminarMensaje = async (id) => {
+    if (!window.confirm("¿Eliminar mensaje?")) return;
+
+    try {
+      const res = await axios.delete(`http://localhost:1234/messages/${id}`);
+
+      console.log("RESPUESTA:", res.data);
+
+      setMensajes((prev) => prev.filter((m) => m._id !== id));
+
+      socket.emit("mensaje_eliminado", id);
+    } catch (error) {
+      console.error("Error al eliminar mensaje:", error);
     }
   };
 
@@ -283,18 +299,37 @@ function App() {
                     margin: "10px 0",
                     padding: "10px",
                     backgroundColor:
-                      m.userId === usuarioLogueadoId
-                        ? "#dcf8c6" // 🟢 estilo WhatsApp (enviado)
-                        : "white",
+                      m.userId === usuarioLogueadoId ? "#dcf8c6" : "white",
                     borderRadius: "8px",
                     width: "fit-content",
+                    position: "relative", // 🔥 IMPORTANTE
                   }}
                 >
                   {m.text}
+
+                  {/* 🗑️ SOLO si es tu mensaje */}
+                  {m.userId === usuarioLogueadoId && (
+                    <button
+                      onClick={() => eliminarMensaje(m._id)}
+                      style={{
+                        position: "absolute",
+                        top: "-10px",
+                        right: "-10px",
+                        border: "none",
+                        background: "red",
+                        color: "white",
+                        borderRadius: "50%",
+                        cursor: "pointer",
+                        width: "20px",
+                        height: "20px",
+                      }}
+                    >
+                      🗑️
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
-
             <form
               onSubmit={enviarMensaje}
               style={{

@@ -37,3 +37,30 @@ export const getMessages = async (req, res) => {
     message: "Historial",
   });
 };
+
+export const deleteMessage = async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log("ID recibido:", id);
+
+    const mensajeEliminado = await Message.findByIdAndDelete(id);
+    console.log("Eliminado:", mensajeEliminado);
+
+    if (!mensajeEliminado) {
+      return res.status(404).json({
+        success: false,
+        message: "Mensaje no encontrado",
+      });
+    }
+
+    res.json({
+      success: true,
+      data: mensajeEliminado,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+};
