@@ -123,6 +123,41 @@ function App() {
     }
   };
 
+  const editarUsuario = async (id) => {
+    const nuevoNombre = prompt("Nuevo nombre:");
+    const nuevoEmail = prompt("Nuevo email:");
+
+    if (!nuevoNombre || !nuevoEmail) return;
+
+    try {
+      const res = await axios.patch(`http://localhost:1234/users/${id}`, {
+        name: nuevoNombre,
+        email: nuevoEmail,
+      });
+
+      // 🔥 ACTUALIZAR ESTADO MANUALMENTE
+      setUsuarios((prev) =>
+        prev.map((u) =>
+          u._id === id ? { ...u, name: nuevoNombre, email: nuevoEmail } : u,
+        ),
+      );
+    } catch (error) {
+      console.error("Error al editar:", error);
+    }
+  };
+
+  const eliminarUsuario = async (id) => {
+    if (!window.confirm("¿Eliminar usuario?")) return;
+
+    try {
+      await axios.delete(`http://localhost:1234/users/${id}`);
+
+      setUsuarios((prev) => prev.filter((u) => u._id !== id));
+    } catch (error) {
+      console.error("Error al eliminar:", error);
+    }
+  };
+
   return (
     <div style={{ display: "flex", height: "100vh", fontFamily: "sans-serif" }}>
       {/* SIDEBAR */}
@@ -195,9 +230,30 @@ function App() {
                   usuarioSeleccionado?._id === user._id ? "#ebebeb" : "white",
               }}
             >
-              <strong>{user.name}</strong>
-              <div style={{ fontSize: "12px", color: "gray" }}>
-                {user.email}
+              <div
+                onClick={() => setUsuarioSeleccionado(user)}
+                style={{ cursor: "pointer" }}
+              >
+                <strong>{user.name}</strong>
+                <div style={{ fontSize: "12px", color: "gray" }}>
+                  {user.email}
+                </div>
+              </div>
+
+              <div
+                style={{
+                  marginTop: "20px",
+                  display: "flex",
+                  gap: "20px",
+                  justifyContent: "center",
+                }}
+              >
+                <button onClick={() => editarUsuario(user._id)}>
+                  ✏️ Editar
+                </button>
+                <button onClick={() => eliminarUsuario(user._id)}>
+                  🗑️ Eliminar
+                </button>
               </div>
             </div>
           ))}

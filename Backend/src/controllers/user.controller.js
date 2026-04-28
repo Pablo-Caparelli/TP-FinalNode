@@ -28,10 +28,26 @@ const deleteUser = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
-  const id = req.params.id;
-  const body = req.body;
-  const user = await User.findByIdAndUpdate(id, body);
-  res.json({ status: "Usuario actualizado" });
+  try {
+    const id = req.params.id;
+    const body = req.body;
+
+    const userUpdated = await User.findByIdAndUpdate(
+      id,
+      body,
+      { new: true }, // 🔥 devuelve el actualizado
+    );
+
+    res.json({
+      success: true,
+      data: userUpdated,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
 };
 
 export { getUsers, addUser, deleteUser, updateUser };
