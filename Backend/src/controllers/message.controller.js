@@ -64,3 +64,42 @@ export const deleteMessage = async (req, res) => {
     });
   }
 };
+
+export const updateMessage = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { text } = req.body;
+
+    if (!text) {
+      return res.status(400).json({
+        success: false,
+        message: "El texto es obligatorio",
+      });
+    }
+
+    const updatedMessage = await Message.findByIdAndUpdate(
+      id,
+      { text },
+      { new: true }, // devuelve el mensaje ya actualizado
+    );
+
+    if (!updatedMessage) {
+      return res.status(404).json({
+        success: false,
+        message: "Mensaje no encontrado",
+      });
+    }
+
+    res.json({
+      success: true,
+      data: updatedMessage,
+      message: "Mensaje actualizado",
+    });
+  } catch (error) {
+    console.log("ERROR UPDATE MESSAGE:", error.message);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

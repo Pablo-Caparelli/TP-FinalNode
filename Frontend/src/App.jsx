@@ -12,6 +12,8 @@ function App() {
   const [chatId, setChatId] = useState(null);
   const [nombre, setNombre] = useState("");
   const [email, setEmail] = useState("");
+  const [editId, setEditId] = useState(null);
+  const [editText, setEditText] = useState("");
 
   // ⚠️ TEMPORAL (después lo reemplazás con login real)
   const usuarioLogueadoId = "69efa7dd0ef2f02303ce7698";
@@ -72,7 +74,6 @@ function App() {
     return () => socket.off("recibir_mensaje");
   }, []);
 
-  // 4. Enviar mensaje
   const enviarMensaje = async (e) => {
     e.preventDefault();
 
@@ -94,6 +95,31 @@ function App() {
     } catch (error) {
       console.error(
         "Error al enviar mensaje:",
+        error.response?.data || error.message,
+      );
+    }
+  };
+
+  const editarMensaje = async (id, text) => {
+    try {
+      const res = await axios.put(`http://localhost:1234/messages/${id}`, {
+        text,
+      });
+
+      if (res.data.success) {
+        setMensajes((prev) =>
+          prev.map((m) => (m._id === id ? res.data.data : m)),
+        );
+
+        socket.emit("mensaje_editado", res.data.data);
+
+        // 🔥 ESTO TE FALTA
+        setEditId(null);
+        setEditText("");
+      }
+    } catch (error) {
+      console.error(
+        "Error al editar mensaje:",
         error.response?.data || error.message,
       );
     }
@@ -299,33 +325,76 @@ function App() {
                     margin: "10px 0",
                     padding: "10px",
                     backgroundColor:
-                      m.userId === usuarioLogueadoId ? "#dcf8c6" : "white",
+                      m.userId?.toString() === usuarioLogueadoId
+                        ? "#dcf8c6"
+                        : "white",
                     borderRadius: "8px",
                     width: "fit-content",
-                    position: "relative", // 🔥 IMPORTANTE
+                    position: "relative",
                   }}
                 >
-                  {m.text}
+                  {/* TEXTO O MODO EDICIÓN */}
+                  {editId === m._id ? (
+                    <div style={{ display: "flex", gap: "5px" }}>
+                      <input
+                        value={editText}
+                        onChange={(e) => setEditText(e.target.value)}
+                      />
 
-                  {/* 🗑️ SOLO si es tu mensaje */}
-                  {m.userId === usuarioLogueadoId && (
-                    <button
-                      onClick={() => eliminarMensaje(m._id)}
-                      style={{
-                        position: "absolute",
-                        top: "-10px",
-                        right: "-10px",
-                        border: "none",
-                        background: "red",
-                        color: "white",
-                        borderRadius: "50%",
-                        cursor: "pointer",
-                        width: "20px",
-                        height: "20px",
-                      }}
-                    >
-                      🗑️
-                    </button>
+                      <button onClick={() => editarMensaje(m._id, editText)}>
+                        💾
+                      </button>
+
+                      <button onClick={() => setEditId(null)}>❌</button>
+                    </div>
+                  ) : (
+                    m.text
+                  )}
+
+                  {/* 🗑️ Y ✏️ SOLO si es tu mensaje */}
+                  {m.userId?.toString() === usuarioLogueadoId && (
+                    <>
+                      {/* DELETE */}
+                      <button
+                        onClick={() => eliminarMensaje(m._id)}
+                        style={{
+                          position: "absolute",
+                          top: "-10px",
+                          right: "-10px",
+                          border: "none",
+                          background: "red",
+                          color: "white",
+                          borderRadius: "50%",
+                          cursor: "pointer",
+                          width: "20px",
+                          height: "20px",
+                        }}
+                      >
+                        🗑️
+                      </button>
+
+                      {/* EDIT ✏️ */}
+                      <button
+                        onClick={() => {
+                          setEditId(m._id);
+                          setEditText(m.text);
+                        }}
+                        style={{
+                          position: "absolute",
+                          top: "-10px",
+                          right: "20px",
+                          border: "none",
+                          background: "orange",
+                          color: "white",
+                          borderRadius: "50%",
+                          cursor: "pointer",
+                          width: "20px",
+                          height: "20px",
+                        }}
+                      >
+                        ✏️
+                      </button>
+                    </>
                   )}
                 </div>
               ))}
