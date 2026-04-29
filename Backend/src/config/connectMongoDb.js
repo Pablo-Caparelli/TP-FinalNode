@@ -2,12 +2,11 @@ import mongoose from "mongoose";
 
 const connectMongoDb = async () => {
   try {
-    //conectarme a la base de datos
-    await mongoose.connect("mongodb://127.0.0.1:27017/db_tpfinal_node");
+    await mongoose.connect(process.env.MONGO_URI);
+
     console.log("✅ Conectado a MongoDB con éxito");
   } catch (error) {
-    //atrapar el error para saber que es lo que sucede
-    console.log(error.message);
+    console.log("❌ Error MongoDB:", error.message);
   }
 };
 
