@@ -1,17 +1,22 @@
 import { Message } from "../models/message.model.js";
+import {
+  messageSchema,
+  updateMessageSchema,
+} from "../validators/message.validator.js";
 
 export const sendMessage = async (req, res, next) => {
   try {
-    const { text, userId, chatId } = req.body;
+    const result = messageSchema.safeParse(req.body);
 
-    if (!text || !userId || !chatId) {
+    if (!result.success) {
       return res.status(400).json({
         success: false,
-        message: "Faltan datos",
+        message: "Datos inválidos",
+        errors: result.error.format(),
       });
     }
 
-    const message = await Message.create({ text, userId, chatId });
+    const message = await Message.create(result.data);
 
     res.json({
       success: true,
@@ -65,20 +70,20 @@ export const deleteMessage = async (req, res, next) => {
 export const updateMessage = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { text } = req.body;
 
-    if (!text) {
+    const result = updateMessageSchema.safeParse(req.body);
+
+    if (!result.success) {
       return res.status(400).json({
         success: false,
-        message: "El texto es obligatorio",
+        message: "Datos inválidos",
+        errors: result.error.format(),
       });
     }
 
-    const updatedMessage = await Message.findByIdAndUpdate(
-      id,
-      { text },
-      { new: true },
-    );
+    const updatedMessage = await Message.findByIdAndUpdate(id, result.data, {
+      new: true,
+    });
 
     if (!updatedMessage) {
       return res.status(404).json({

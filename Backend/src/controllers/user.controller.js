@@ -1,4 +1,5 @@
 import { User } from "../models/user.model.js";
+import { updateUserSchema, userSchema } from "../validators/user.validator.js";
 
 export const getUsers = async (req, res, next) => {
   try {
@@ -11,9 +12,17 @@ export const getUsers = async (req, res, next) => {
 
 const addUser = async (req, res, next) => {
   try {
-    const { name, email } = req.body;
+    const result = userSchema.safeParse(req.body);
 
-    const user = await User.create({ name, email });
+    if (!result.success) {
+      return res.status(400).json({
+        success: false,
+        message: "Datos inválidos",
+        errors: result.error.format(),
+      });
+    }
+
+    const user = await User.create(result.data);
 
     res.json({
       success: true,
@@ -50,9 +59,18 @@ const deleteUser = async (req, res, next) => {
 const updateUser = async (req, res, next) => {
   try {
     const id = req.params.id;
-    const body = req.body;
 
-    const userUpdated = await User.findByIdAndUpdate(id, body, {
+    const result = updateUserSchema.safeParse(req.body);
+
+    if (!result.success) {
+      return res.status(400).json({
+        success: false,
+        message: "Datos inválidos",
+        errors: result.error.format(),
+      });
+    }
+
+    const userUpdated = await User.findByIdAndUpdate(id, result.data, {
       new: true,
     });
 

@@ -1,15 +1,19 @@
 import { Chat } from "../models/chat.model.js";
+import { chatSchema } from "../validators/chat.validator.js";
 
 export const createChat = async (req, res, next) => {
   try {
-    const { user1, user2 } = req.body;
+    const result = chatSchema.safeParse(req.body);
 
-    if (!user1 || !user2) {
+    if (!result.success) {
       return res.status(400).json({
         success: false,
-        message: "Faltan usuarios",
+        message: "Datos inválidos",
+        errors: result.error.format(),
       });
     }
+
+    const { user1, user2 } = result.data;
 
     let chat = await Chat.findOne({
       users: { $all: [user1, user2] },
