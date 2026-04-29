@@ -10,7 +10,7 @@ export const getUsers = async (req, res, next) => {
   }
 };
 
-const addUser = async (req, res, next) => {
+export const addUser = async (req, res, next) => {
   try {
     const result = userSchema.safeParse(req.body);
 
@@ -33,7 +33,7 @@ const addUser = async (req, res, next) => {
   }
 };
 
-const deleteUser = async (req, res, next) => {
+export const deleteUser = async (req, res, next) => {
   try {
     const id = req.params.id;
 
@@ -56,7 +56,7 @@ const deleteUser = async (req, res, next) => {
   }
 };
 
-const updateUser = async (req, res, next) => {
+export const updateUser = async (req, res, next) => {
   try {
     const id = req.params.id;
 
@@ -90,5 +90,3 @@ const updateUser = async (req, res, next) => {
     next(error);
   }
 };
-
-export { getUsers, addUser, deleteUser, updateUser };

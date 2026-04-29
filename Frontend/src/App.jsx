@@ -23,7 +23,7 @@ function App() {
     const cargarUsuarios = async () => {
       try {
         const res = await axios.get("http://localhost:1234/users");
-        setUsuarios(res.data);
+        setUsuarios(res.data.data);
       } catch (error) {
         console.error("Error al traer usuarios:", error);
       }
