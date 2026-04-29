@@ -108,7 +108,7 @@ function App() {
 
       if (res.data.success) {
         setMensajes((prev) =>
-          prev.map((m) => (m._id === id ? res.data.data : m)),
+          prev.map((m) => (m._id === id ? { ...m, text: editText } : m)),
         );
 
         socket.emit("mensaje_editado", res.data.data);
@@ -199,6 +199,8 @@ function App() {
       console.error("Error al eliminar mensaje:", error);
     }
   };
+
+  const isMine = (m) => String(m.userId?._id || m.userId) === usuarioLogueadoId;
 
   return (
     <div style={{ display: "flex", height: "100vh", fontFamily: "sans-serif" }}>
@@ -324,10 +326,7 @@ function App() {
                   style={{
                     margin: "10px 0",
                     padding: "10px",
-                    backgroundColor:
-                      m.userId?.toString() === usuarioLogueadoId
-                        ? "#dcf8c6"
-                        : "white",
+                    backgroundColor: isMine(m) ? "#dcf8c6" : "white",
                     borderRadius: "8px",
                     width: "fit-content",
                     position: "relative",
@@ -352,7 +351,7 @@ function App() {
                   )}
 
                   {/* 🗑️ Y ✏️ SOLO si es tu mensaje */}
-                  {m.userId?.toString() === usuarioLogueadoId && (
+                  {isMine(m) && (
                     <>
                       {/* DELETE */}
                       <button

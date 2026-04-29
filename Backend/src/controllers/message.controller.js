@@ -83,7 +83,7 @@ export const updateMessage = async (req, res, next) => {
 
     const updatedMessage = await Message.findByIdAndUpdate(id, result.data, {
       new: true,
-    });
+    }).populate("userId");
 
     if (!updatedMessage) {
       return res.status(404).json({
