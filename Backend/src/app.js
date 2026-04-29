@@ -6,6 +6,7 @@ import { connectMongoDb } from "./config/connectMongoDb.js";
 import { userRouter } from "./routes/user.route.js";
 import chatRouter from "./routes/chat.route.js";
 import messageRouter from "./routes/message.route.js";
+import { errorHandler } from "./middlewares/errorHandler.js";
 
 const server = express();
 const httpServer = createServer(server); // Servidor base para Sockets
@@ -25,6 +26,15 @@ server.use(express.json());
 server.use("/users", userRouter);
 server.use("/chats", chatRouter);
 server.use("/messages", messageRouter);
+
+server.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: "Ruta no encontrada",
+  });
+});
+
+server.use(errorHandler);
 
 // Lógica de Chat en tiempo real
 io.on("connection", (socket) => {

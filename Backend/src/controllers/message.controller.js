@@ -1,6 +1,6 @@
 import { Message } from "../models/message.model.js";
 
-export const sendMessage = async (req, res) => {
+export const sendMessage = async (req, res, next) => {
   try {
     const { text, userId, chatId } = req.body;
 
@@ -16,35 +16,34 @@ export const sendMessage = async (req, res) => {
     res.json({
       success: true,
       data: message,
+      message: "Mensaje enviado",
     });
   } catch (error) {
-    console.log("ERROR MESSAGE:", error.message);
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    next(error);
   }
 };
 
-export const getMessages = async (req, res) => {
-  const { chatId } = req.params;
+export const getMessages = async (req, res, next) => {
+  try {
+    const { chatId } = req.params;
 
-  const messages = await Message.find({ chatId }).populate("userId");
+    const messages = await Message.find({ chatId }).populate("userId");
 
-  res.json({
-    success: true,
-    data: messages,
-    message: "Historial",
-  });
+    res.json({
+      success: true,
+      data: messages,
+      message: "Historial",
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
-export const deleteMessage = async (req, res) => {
+export const deleteMessage = async (req, res, next) => {
   try {
     const { id } = req.params;
-    console.log("ID recibido:", id);
 
     const mensajeEliminado = await Message.findByIdAndDelete(id);
-    console.log("Eliminado:", mensajeEliminado);
 
     if (!mensajeEliminado) {
       return res.status(404).json({
@@ -56,16 +55,14 @@ export const deleteMessage = async (req, res) => {
     res.json({
       success: true,
       data: mensajeEliminado,
+      message: "Mensaje eliminado",
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message,
-    });
+    next(error);
   }
 };
 
-export const updateMessage = async (req, res) => {
+export const updateMessage = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { text } = req.body;
@@ -80,7 +77,7 @@ export const updateMessage = async (req, res) => {
     const updatedMessage = await Message.findByIdAndUpdate(
       id,
       { text },
-      { new: true }, // devuelve el mensaje ya actualizado
+      { new: true },
     );
 
     if (!updatedMessage) {
@@ -96,10 +93,6 @@ export const updateMessage = async (req, res) => {
       message: "Mensaje actualizado",
     });
   } catch (error) {
-    console.log("ERROR UPDATE MESSAGE:", error.message);
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    next(error);
   }
 };

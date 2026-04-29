@@ -1,11 +1,15 @@
 import { User } from "../models/user.model.js";
 
-const getUsers = async (req, res) => {
-  const users = await User.find();
-  res.json(users);
+export const getUsers = async (req, res, next) => {
+  try {
+    const users = await User.find();
+    res.json({ success: true, data: users });
+  } catch (error) {
+    next(error);
+  }
 };
 
-const addUser = async (req, res) => {
+const addUser = async (req, res, next) => {
   try {
     const { name, email } = req.body;
 
@@ -16,37 +20,56 @@ const addUser = async (req, res) => {
       data: user,
     });
   } catch (error) {
-    console.log("ERROR USER:", error.message);
-    res.status(500).json({ success: false });
+    next(error);
   }
 };
 
-const deleteUser = async (req, res) => {
-  const id = req.params.id;
-  await User.findByIdAndDelete(id);
-  res.json({ status: "Usuario eliminado" });
+const deleteUser = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+
+    const userDeleted = await User.findByIdAndDelete(id);
+
+    if (!userDeleted) {
+      return res.status(404).json({
+        success: false,
+        message: "Usuario no encontrado",
+      });
+    }
+
+    res.json({
+      success: true,
+      data: userDeleted,
+      message: "Usuario eliminado",
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
-const updateUser = async (req, res) => {
+const updateUser = async (req, res, next) => {
   try {
     const id = req.params.id;
     const body = req.body;
 
-    const userUpdated = await User.findByIdAndUpdate(
-      id,
-      body,
-      { new: true }, // 🔥 devuelve el actualizado
-    );
+    const userUpdated = await User.findByIdAndUpdate(id, body, {
+      new: true,
+    });
+
+    if (!userUpdated) {
+      return res.status(404).json({
+        success: false,
+        message: "Usuario no encontrado",
+      });
+    }
 
     res.json({
       success: true,
       data: userUpdated,
+      message: "Usuario actualizado",
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message,
-    });
+    next(error);
   }
 };
 

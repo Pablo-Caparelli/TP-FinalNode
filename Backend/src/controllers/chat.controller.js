@@ -1,6 +1,6 @@
 import { Chat } from "../models/chat.model.js";
 
-export const createChat = async (req, res) => {
+export const createChat = async (req, res, next) => {
   try {
     const { user1, user2 } = req.body;
 
@@ -11,12 +11,10 @@ export const createChat = async (req, res) => {
       });
     }
 
-    // 🔥 Buscar si ya existe el chat
     let chat = await Chat.findOne({
       users: { $all: [user1, user2] },
     });
 
-    // 🔥 Si no existe → crearlo
     if (!chat) {
       chat = await Chat.create({
         users: [user1, user2],
@@ -26,22 +24,23 @@ export const createChat = async (req, res) => {
     res.json({
       success: true,
       data: chat,
+      message: "Chat creado/encontrado",
     });
   } catch (error) {
-    console.log("ERROR CHAT:", error.message);
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    next(error);
   }
 };
 
-export const getChats = async (req, res) => {
-  const chats = await Chat.find().populate("users");
+export const getChats = async (req, res, next) => {
+  try {
+    const chats = await Chat.find().populate("users");
 
-  res.json({
-    success: true,
-    data: chats,
-    message: "Lista de chats",
-  });
+    res.json({
+      success: true,
+      data: chats,
+      message: "Lista de chats",
+    });
+  } catch (error) {
+    next(error);
+  }
 };
