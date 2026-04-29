@@ -229,7 +229,7 @@ function App() {
             onChange={(e) => setNombre(e.target.value)}
             placeholder="Nombre"
             style={{
-              width: "100%",
+              width: "80%",
               marginBottom: "5px",
               padding: "8px",
             }}
@@ -240,7 +240,7 @@ function App() {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email"
             style={{
-              width: "100%",
+              width: "80%",
               marginBottom: "5px",
               padding: "8px",
             }}
@@ -249,12 +249,13 @@ function App() {
           <button
             type="submit"
             style={{
-              width: "100%",
+              width: "86%",
               padding: "8px",
               backgroundColor: "#25d366",
               color: "white",
               border: "none",
               cursor: "pointer",
+              borderRadius: "10px",
             }}
           >
             Agregar usuario
